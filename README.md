@@ -36,4 +36,4 @@ We first analyze a traditional ping. Typically a ping echo-request (type 8) is s
 Firewalls and gateways can also rate-limit ICMP packets. However, this control is mostly used to mitigate DDoS attacks and would imply ICMP-based data exfiltration is only slowed down.
 DPI (Deep Packet Inspection) and IPS (Intrusion Prevention System) solutions such as Zeek and Snort or next-gen firewalls could possibly detect this ICMP tunnel due to the presence of the (plain-text) payload and static ID value. Network Anomaly Detection solutions could also flag this reverse shell. We have a modified version of icmpdoor we use for client engagements which does not get detected by these IDS/IPS systems.
 
-#### Copyright Cryptsus
+###### © CryptSus
